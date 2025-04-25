@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctors List</title>
+</head>
+<body>
+    <h1>Doctors List</h1>
+    <ul>
+        {% for doctor in doctors %}
+            <li>{{ doctor.name }} - {{ doctor.specialization }} - {{ doctor.location }} - {{ doctor.contact_number }} - {{ doctor.available_days }} - {{ doctor.available_time }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e6f2ff;
+            color: #333;
+        }
+
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* Doctor list section */
+        .doctor-list {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+        }
+
+        .doctor-list h2 {
+            color: #007bff;
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #doctor-search {
+            padding: 10px;
+            width: 97%;
+            border-radius: 25px;
+            border: 1px solid #007bff;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        #doctor-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e9f7ff;
+            color: #0056b3;
+            font-weight: 600;
+        }
+
+        td {
+            background-color: #f4faff;
+        }
+
+        td button {
+            padding: 7px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        td button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Right section for booking */
+        .right-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .right-section h2 {
+            color: #007bff;
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .right-section p {
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .reschedule-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .reschedule-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Form styling */
+        .form-section {
+            padding: 20px;
+            background-color: #f4faff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 25px;
+            border: 1px solid #007bff;
+            font-size: 1em;
+        }
+
+        button[type="submit"] {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Available times and scheduling section */
+        #available-times {
+            margin-top: 20px;
+        }
+
+        #available-times ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #available-times li {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+
+        /* Reschedule link and appointment section */
+        #reschedule-link {
+            margin-top: 20px;
+        }
+
+        #reschedule-link a {
+            color: #007bff;
+            font-size: 1.1em;
+            text-decoration: none;
+        }
+
+        #reschedule-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Consultation Booking</h1>
+
+    <div class="container">
+
+        <!-- Left Section: Doctor List -->
+        <div class="doctor-list">
+            <h2>Available Doctors</h2>
+            <input type="text" id="doctor-search" placeholder="Search by doctor name..." oninput="filterDoctors()">
+            <!-- Scrollable doctor table -->
+            <div id="doctor-table-container">
+                <table id="doctor-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Specialization</th>
+                            <th>Location</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Doctor data will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Section: Appointment and Reschedule -->
+        <div class="right-section">
+            <div class="form-section">
+                <h2>Enter Query to Check Availability</h2>
+                <form id="query-form">
+                    <label for="query">Your Query:</label>
+                    <input type="text" id="query" name="query" placeholder="e.g., Check availability for Dr. Smith">
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+
+            <div id="available-times" style="display: none;">
+                <h2>Available Times:</h2>
+                <ul id="times-list"></ul>
+            </div>
+
+            <div id="appointment-link" style="display: none;">
+                <h2>Want to Book an Appointment?</h2>
+                <button class="reschedule-btn" onclick="window.location.href='';">Book Appointment</button>
+            </div>
+
+            <div id="reschedule-link" style="display: none;">
+                <p>Already Booked? <a href="" target="_blank">Reschedule Appointment</a></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let doctors = [];
+
+        // Fetch doctor data from backend and render in table
+        fetch('/chatbot/get-doctors/')
+            .then(response => response.json())
+            .then(data => {
+                doctors = data.doctors;
+                renderDoctorTable(doctors);
+            })
+            .catch(error => console.error('Error fetching doctor data:', error));
+
+        function renderDoctorTable(doctors) {
+            const doctorTable = document.getElementById('doctor-table').getElementsByTagName('tbody')[0];
+            doctorTable.innerHTML = ''; // Clear existing rows
+
+            doctors.forEach(doctor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${doctor.name}</td>
+                    <td>${doctor.specialization}</td>
+                    <td>${doctor.location}</td>
+                    <td><button onclick="showDoctorAvailability('${doctor.id}', '${doctor.name}')">Check Availability</button></td>
+                `;
+                doctorTable.appendChild(row);
+            });
+        }
+
+        // Filter doctors based on search query
+        function filterDoctors() {
+            const query = document.getElementById('doctor-search').value.toLowerCase();
+            const filteredDoctors = doctors.filter(doctor =>
+                doctor.name.toLowerCase().includes(query)
+            );
+            renderDoctorTable(filteredDoctors);
+        }
+
+        // Show availability of selected doctor
+        function showDoctorAvailability(doctorId, doctorName) {
+            // Set the doctor name in the query input field
+            document.getElementById('query').value = `${doctorName}`;
+
+            // Fetch available times for the selected doctor from the backend
+            fetch(`/chatbot/check-availability/?doctor_id=${doctorId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const availableTimes = data.available_times; // Get the available times from the response
+                    const timesList = document.getElementById('times-list');
+                    const doctorUrl = data.url; // Get the doctor URL from the response
+                    timesList.innerHTML = ''; // Clear previous times list
+
+                    // Update the appointment and reschedule links dynamically
+                    document.querySelector('.reschedule-btn').setAttribute('onclick', `window.location.href='${doctorUrl}'`);
+                    document.querySelector('#reschedule-link a').setAttribute('href', doctorUrl);
+
+                    if (availableTimes) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = availableTimes; // Display the available times
+                        timesList.appendChild(listItem);
+                        document.getElementById('available-times').style.display = 'block'; // Show available times section
+                    } else {
+                        timesList.innerHTML = '<li>No available times found</li>';
+                    }
+
+                    // Show the scheduling link section
+                    document.getElementById('appointment-link').style.display = 'block';
+                    // Show the reschedule link section
+                    document.getElementById('reschedule-link').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching availability:', error);
+                });
+        }
+
+        // Handle query form submission
+        document.getElementById('query-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+            const doctorName = query.trim();
+            const doctor = doctors.find(d => d.name.toLowerCase() === doctorName.toLowerCase());
+            if (doctor) {
+                showDoctorAvailability(doctor.id, doctor.name);
+            } else {
+                alert('Doctor not found. Please check the name.');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,893 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment Chat-Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url("{% static 'images/bg8.jpg' %}"); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Chatbot container styling (increased size) */
+        .chat-container {
+            position: relative;
+            width: 500px; 
+            height: 650px; 
+            background: linear-gradient(145deg, #d8f1ff, #a3dbff);
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 2px solid #1e90ff;
+        }
+        
+        /* Chatbot title styling */
+        .chat-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Menu styling */
+        .menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            border-radius: 5px;
+            padding: 18px;
+            cursor: pointer;
+        }
+
+        .menu-options {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background-color: #bae4ff;
+            width: 250px; /* Increased width */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            {% comment %} z-index: 10; {% endcomment %}
+            overflow: hidden; /* Ensures child elements don't overflow */
+        }
+        
+        .menu-options button {
+            width: 100%;
+            padding: 10px;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #007bff;
+            border-radius: 10px; /* Keep the rounded corners */
+            transition: background-color 0.3s; /* Smooth transition on hover */
+        }
+        
+        .menu-options button:hover {
+            background-color: #e6f3ff; /* Rounded background color */
+            color: #0056b3;
+        }
+
+        /* Chatbox styling */
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
+            {% comment %} height: 400px; {% endcomment %}
+        }
+        
+        .chat-box p {
+            margin: 5px 0;
+            word-wrap: break-word;
+        }
+        
+        /* User and bot message styling */
+        .user-msg, .bot-msg {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+        
+        .user-msg {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            text-align: right;
+        }
+        
+        .bot-msg {
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: left;
+        }
+
+        .modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            background-color: #dae8f9;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            z-index: 1000;
+            color: steelblue;
+        }
+    
+        .modal.active {
+            display: block;
+        }
+    
+        .modal-header {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            text-align: center;
+            color: #0056b3;
+        }
+    
+        .modal-header button {
+            position: relative;
+            {% comment %} right: 10px;
+            top: 10px; {% endcomment %}
+            font-size: 24px;
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+        }
+    
+        .modal-header button:hover {
+            color: darkred;
+        }
+    
+        .modal-content {
+            margin-top: 10px;
+        }
+
+       input[type="text"], input[type="file"], textarea {
+           width: 100%;
+           padding: 10px;
+           margin-top: 10px;
+           border: 1px solid #1e90ff;
+           border-radius: 5px;
+           box-sizing: border-box;
+       }
+
+       button {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 15px;
+        margin-top: 10px;
+        width: 80%;
+        background-color: #007bff;
+        color: white;
+        transition: background-color 0.3s;
+       }
+
+       button:hover {
+        background-color: #007bff;
+        color: white;
+       }
+
+       #need:hover {
+        width: 90%;
+        background-color: #007bff;
+        color: white;
+
+    }
+        
+        /* Input box and send button styling */
+        .input-box {
+            display: flex;
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 2px solid #1e90ff;
+            border-radius: 10px;
+        }
+        
+        input[type="text"] {
+            width: 75%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #1e90ff;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            width: 30%;
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        /* Language selection centered and smaller */
+        .language-selection {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        /* Symptom container styling */
+        .symptom-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #symptomPrompt {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #symptomBox {
+            width: 95%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #1e90ff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Translate section */
+        .translate-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #translateBox {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #1e90ff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }   
+
+        .outer-box{
+            background-color: white;
+            width:450px;
+            height:400px;
+            border: 1px solid #1e90ff;
+            position: relative; 
+            
+        }
+
+        .modal-p-text{
+            font-size: 12px;
+            font-style: italic;
+            color: #0056b3;
+            position: relative;
+            padding-left: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Chatbot container -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-title">CuraBot</div>
+        <div class="chat-box" id="chatBox">
+            <div class="bot-msg">
+                <p>Thank you for using our service! May I know your name?</p>
+            </div>
+        </div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+        <!-- Menu -->
+        <div class="menu" onclick="toggleMenu()">☰</div>
+        <div class="menu-options" id="menuOptions">
+            <button id="need" onclick="openModal('medicineSearchModal')">Medicine Search</button>
+            <button id="need" onclick="openModal('translationModal')">Translation</button>
+            <button id="need" onclick="openModal('prescriptionUploadModal')">Prescription Upload</button>
+            <button id="need" onclick="openModal('urgentCareModal')">Urgent Care</button>
+        </div>
+        
+        <!-- Modals -->
+        <div class="modal" id="medicineSearchModal">
+            <div class="modal-header">
+                Search for Medicine
+                <button onclick="closeModal('medicineSearchModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <input type="text" id="medicineSearchInput" placeholder="Enter medicine name..." />
+                <button onclick="searchMedicine()">Search</button>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+
+        <div class="modal" id="translationModal">
+            <div class="modal-header">
+                Translation
+                <button onclick="closeModal('translationModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="language-selection">
+                    <p>Select Language: 
+                        <button onclick="setLanguage('en')">English</button>
+                        <button onclick="setLanguage('hi')">Hindi</button>
+                    </p>
+                </div>
+                <div class="symptom-container">
+                    <p id="symptomPrompt">Please describe your symptoms below:</p>
+                    <textarea id="symptomBox" rows="4" placeholder="Type your symptoms here..."></textarea>
+                    <button id="translateBtn" onclick="translateText()">Translate</button>
+                </div>
+                <div class="translate-container">
+                    <textarea id="translateBox" rows="1" placeholder="Translation will appear here..."></textarea>
+                    <button id="submitSymptomsBtn" onclick="submitSymptoms()">Submit Symptoms</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="prescriptionUploadModal">
+            <div class="modal-header">
+                Upload Prescription
+                <button onclick="closeModal('prescriptionUploadModal')">&times;</button>
+            </div>
+            <div class= "modal-p-text">
+                <p>Choose '.pdf' or '.png', '.jpg', '.jpeg' files only</p>
+            </div>
+            <div class="modal-content">
+                <form id="prescriptionForm" enctype="multipart/form-data">
+                    <input type="file" id="prescriptionUploadInput" accept="image/*,application/pdf" />
+                    <button type="button" onclick="uploadPrescription()">Upload</button>
+                </form>
+                <div id="uploadStatus"></div>
+                <div id="recommendations"></div>
+            </div>
+        </div>
+
+        <div class="modal" id="urgentCareModal">
+            <div class="modal-header">
+                For Urgent Care
+                <button onclick="closeModal('urgentCareModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p><strong>Objective:</strong> Support urgent care consultations and handle critical cases.</p>
+                <p>When to use this service?</p>
+                <ul>
+                    <li>When you are facing an urgent health condition, such as severe pain or sudden illness.</li>
+                    <li>For life-threatening situations.</li>
+                </ul>
+                <div id="urgentCareActions">
+                    <textarea id="urgentSymptomBox" rows="4" placeholder="Describe your symptoms or urgency..."></textarea>
+                    <button onclick="handleUrgentCare()">Submit</button>
+                </div>
+                <div id="urgentCareStatus"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        let language = 'en';
+        let userName = '';  // To store the user's name
+
+        // Helper function to get CSRF token for Django
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Send message when clicking the "Send" button
+        function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (userMessage) {
+                addMessage(userMessage, 'user');
+                userInput.value = '';
+                setTimeout(() => {
+                    if (!userName) {
+                        userName = userMessage;  // Set user name
+                        greetUser(userName);  // Greet user by their name
+                    } else {
+                        getBotResponse(userMessage);
+                    }
+                }, 500);
+            }
+            else{
+                alert("Hey, give us your name please!😅")
+            }
+        }
+
+        // Add a message to the chat box
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add(sender === 'user' ? 'user-msg' : 'bot-msg');
+            messageElement.innerHTML = `<p>${message}</p>`;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Greet the user with their name
+        function greetUser(name) {
+            const greeting = `Hi ${name}! How may I assist you today? Would you like help with booking or rescheduling your appointment or searching medicines informations or translation or getting recommendations after uploading prescription or <strong>Urgent Care</strong> ?`;
+            addMessage(greeting, 'bot');
+        }
+
+        // Handle bot's response based on user's message
+        function getBotResponse(message) {
+            let response = '';
+            const appointmentLink = '/chatbot/book-appointment'; 
+
+            if (message.toLowerCase().includes('appointment') || message.toLowerCase().includes('book')) {
+                response = `You can book your appointment here: <a href="${appointmentLink}" target="_blank">Click here to book</a>`;
+            } else if (message.toLowerCase().includes('reschedule') || message.toLowerCase().includes('reshedule')) {
+                response = `To reschedule your appointment, please use the same link: <a href="${appointmentLink}" target="_blank">Click here to reschedule</a>`;
+            } else if (message.toLowerCase().includes('medicine') || message.toLowerCase().includes('medication') || message.toLowerCase().includes('search')) {
+                response = `If u want to search medicine, please click the top left menu button. Write <strong>steps</strong> if you want us to guide you! Thank you!`;
+            } else if (message.toLowerCase().includes('upload') || message.toLowerCase().includes('prescription') || message.toLowerCase().includes('recommend')) {
+                response = `Hey! You can upload your prescription in the top left menu and get some recommendations based on that. Isn't it exciting? Write <strong>steps</strong> if you want us to guide you!`;
+            } else if (message.toLowerCase().includes('translation') || message.toLowerCase().includes('translate') || message.toLowerCase().includes('symptoms') || message.toLowerCase().includes('hindi')) {
+                response = `No worries! We can help you with translating your symptoms. Click on the top left menu. Write <strong>steps</strong> if you want us to guide you!`;
+            } else if (message.toLowerCase().includes('urgent') || message.toLowerCase().includes('immediate') || message.toLowerCase().includes('care')) {
+                response = `Click on the top left menu, u can find urgent care. Write <strong>steps</strong> if you want us to guide you!`;
+            } else if (message.toLowerCase().includes('step') || message.toLowerCase().includes('steps')) {  
+                response = `**Steps to Get Started:**\n
+                1️⃣ Tap the ☰ Menu in the Top Left  
+                - Explore all the options available to make your experience seamless.\n
+                2️⃣ Search for Medicines
+                - Use the <strong>Medicine Search</strong> feature for instant suggestions on the medicines you need.\n
+                3️⃣ Translate Effortlessly  
+                - Click on <strong>Translation</strong> to convert Hindi text into English in a snap!\n
+                4️⃣ Upload & Recommend
+                - Use <strong>Prescription Upload</strong> to upload your prescription and get personalized medicine recommendations right away.\n
+                5️⃣ Access Urgent Care
+                - Navigate to the <strong>Urgent Care</strong> section to get services instantly.`;
+                } else {
+                response = '<strong>I can help you with booking, rescheduling an appointment, searching medicines informations, translation, getting recommendations after uploading prescription. Please let me know what you need.</strong>';
+            }
+
+            addMessage(response, 'bot');
+        }
+
+        function toggleMenu() {
+            const menuOptions = document.getElementById('menuOptions');
+            menuOptions.style.display = menuOptions.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+        }
+        function searchMedicine() {
+            alert('Searching for medicine...');
+        }
+
+        function uploadPrescription() {
+            alert('Prescription uploaded.');
+        }
+
+        document.getElementById('medicineSearchInput').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                searchMedicine(); // Call the search function
+            }
+        });
+
+        // Function to search for medicine on OpenFDA
+        function searchMedicine() {
+        const query = document.getElementById('medicineSearchInput').value.trim();
+        const resultsDiv = document.getElementById('searchResults');
+
+        if (!query) {
+            resultsDiv.innerHTML = "<p style='color:red;'>Please enter a medicine name.</p>";
+            return;
+        }
+
+        // OpenFDA API URL
+        const apiUrl = `https://api.fda.gov/drug/label.json?search=openfda.brand_name:${query}`;
+
+        // Clear previous results
+        resultsDiv.innerHTML = "<p>Searching...</p>";
+
+        // Fetch data from OpenFDA API
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("No data found.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    const result = data.results[0];
+                    const generic_name = result.openfda.generic_name ? result.openfda.generic_name[0] : "Unknown";
+                    const substance_name = result.openfda.substance_name ? result.openfda.substance_name[0] : "Unknown";
+                    const brandName = result.openfda.brand_name ? result.openfda.brand_name[0] : "Unknown";
+                    const manufacturer = result.openfda.manufacturer_name ? result.openfda.manufacturer_name[0] : "Unknown";
+                    const product_type = result.openfda.product_type ? result.openfda.product_type[0] : "Unknown";
+                
+
+
+                    resultsDiv.innerHTML = `
+                        <p><strong>Brand Name:</strong> ${brandName}</p>
+                        <p><strong>Manufacturer:</strong> ${manufacturer}</p>
+                        <p><strong>Substance Name:</strong> ${substance_name}</p>
+                        <p><strong>Product Type:</strong> ${product_type}</p>
+                        <p><strong>Generic Name:</strong> ${generic_name}</p>
+
+                        {% comment %} <p>For more information, visit:</p>
+                        <a href="https://open.fda.gov/apis/drug/label/" target="_blank">OpenFDA Page</a> {% endcomment %}
+                    `;
+                }else {
+                    // When no results are found
+                    resultsDiv.innerHTML = "<p style='color:blue;'>Medicine not found. Please try another name.</p>";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                resultsDiv.innerHTML = "<p style='color:red;'>Medicine not found. Please try another name.</p>";
+            });
+    }
+
+        // Functions to open and close modals
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "block";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+
+        function setLanguage(lang) {
+            // Set the chosen language
+            language = lang;
+        
+            // Change the symptom prompt and symptom box placeholder
+            const symptomPrompt = language === 'hi' ? "कृपया नीचे अपने लक्षणों का वर्णन करें:" : "Please describe your symptoms below:";
+            const symptomBoxPlaceholder = language === 'hi' ? "यहां अपने लक्षण टाइप करें..." : "Type your symptoms here...";
+        
+            // Update symptom-related text
+            document.getElementById('symptomPrompt').innerText = symptomPrompt;
+            document.getElementById('symptomBox').placeholder = symptomBoxPlaceholder;
+        
+            // Change the translate box placeholder
+            const translateBoxPlaceholder = language === 'hi' ? "अनुवाद यहां दिखाई देगा..." : "Translation will appear here...";
+            document.getElementById('translateBox').placeholder = translateBoxPlaceholder;
+        
+            // Change the button text for 'Translate' and 'Submit Symptoms'
+            const translateButtonText = language === 'hi' ? "अनुवाद करें" : "Translate";
+            const submitSymptomsButtonText = language === 'hi' ? "लक्षण भेजें" : "Submit Symptoms";
+        
+            // Update button texts
+            document.getElementById('translateBtn').innerText = translateButtonText;
+            document.getElementById('submitSymptomsBtn').innerText = submitSymptomsButtonText;
+        }
+
+        // Function to handle translation when the 'Translate' button is clicked
+        function translateText() {
+            const symptoms = document.getElementById('symptomBox').value;
+        
+            // Debug log to check the symptoms entered
+            console.log("Sending symptoms for translation:", symptoms);  
+        
+            if (language === 'hi') {
+                // Send the request to translate from Hindi to English
+                fetch('/chatbot/translate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),  // Add CSRF token if needed
+                    },
+                    body: JSON.stringify({ text: symptoms, from_lang: 'hi', to_lang: 'en' }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // If translation is successful, update the translate box
+                    if (data.translated_text) {
+                        document.getElementById('translateBox').value = data.translated_text;
+                    } else {
+                        console.error('Translation failed:', data.error);
+                        alert('Translation failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                // If language is English, just copy the symptoms to the translate box
+                document.getElementById('translateBox').value = symptoms;
+            }
+        }
+
+        function submitSymptoms() {
+            const originalText = document.getElementById('symptomBox').value;
+            const translatedText = document.getElementById('translateBox').value;
+            // Call Django backend to send the translated symptoms via email
+            fetch('/chatbot/send_email/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ symptoms: originalText, user_name: userName,  }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Symptoms sent to doctor successfully.');
+                } else {
+                    alert('Failed to send symptoms. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the symptoms.');
+            });
+        }
+        
+        function uploadPrescription() {
+            const fileInput = document.getElementById("prescriptionUploadInput");
+            const uploadStatus = document.getElementById("uploadStatus");
+            const recommendations = document.getElementById("recommendations");
+
+            uploadStatus.textContent = "";
+            recommendations.innerHTML = "";
+        
+            if (!fileInput.files.length) {
+                const lineBreak = document.createElement("br");
+                uploadStatus.appendChild(lineBreak);
+                const errorMessage = document.createTextNode("No file selected. Please choose a file to upload.");
+                uploadStatus.appendChild(errorMessage);
+                uploadStatus.style.color = "red";
+                uploadStatus.style.fontWeight = "bold";
+                return;
+            }
+        
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+        
+            fetch("/chatbot/upload/", {
+                method: "POST",
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const lineBreak = document.createElement("br");
+                        uploadStatus.appendChild(lineBreak);
+                        const successMessage = document.createTextNode("File uploaded successfully!");
+                        uploadStatus.appendChild(successMessage);
+                        uploadStatus.style.color = "green";
+                        uploadStatus.style.fontWeight = "bold";
+        
+                        recommendations.innerHTML = `
+                            <p><strong>Recommendations based on your prescription:</strong></p>
+                            <ul>
+                                ${data.recommendations.map(rec => `<li>${rec}</li>`).join("")}
+                            </ul>
+                        `;
+                    } else {
+                        const lineBreak = document.createElement("br");
+                        const errorMessage = document.createTextNode(data.message);
+                        uploadStatus.appendChild(errorMessage);
+                        uploadStatus.style.color = "red";
+                        uploadStatus.style.fontWeight = "bold";
+                    }
+                })
+                .catch(error => {
+                    uploadStatus.textContent = "Error uploading file. Please try again.";
+                    console.error("Upload error:", error);
+                    uploadStatus.style.color = "red";
+                    uploadStatus.style.fontWeight = "bold";
+                });
+        }
+
+                const doctors = [
+            {
+                name: "Dr. Shweta Dutta",
+                specialization: "Physician",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "fever", serious: false },
+                    { keyword: "general", serious: false }
+                ]
+            },
+            {
+                name: "Dr. John Doe",
+                specialization: "Cardiologist",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "heart", serious: true },
+                    { keyword: "cardiac", serious: true },
+                    { keyword: "chest pain", serious: true },
+                    { keyword: "breathing", serious: true },
+                    { keyword: "heart rate", serious: true }
+                ]
+            },
+            {
+                name: "Dr. Jane Smith",
+                specialization: "Dermatologist",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "skin", serious: false },
+                    { keyword: "rash", serious: true },
+                    { keyword: "itching", serious: false },
+                    { keyword: "dermatology", serious: false },
+                    { keyword: "acne", serious: false },
+                    { keyword: "scars", serious: false },
+                    { keyword: "moles", serious: false }
+                ]
+            },
+            {
+                name: "Dr. Emma Wilson",
+                specialization: "Pediatrician",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "children", serious: true },
+                    { keyword: "child", serious: true },
+                    { keyword: "kid", serious: true },
+                    { keyword: "baby", serious: true },
+                    { keyword: "infant", serious: true }
+                ]
+            },
+            {
+                name: "Dr. Michael Johnson",
+                specialization: "Orthopedic Surgeon",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "musculoskeletal", serious: true },
+                    { keyword: "spine", serious: true },
+                    { keyword: "sports injuries", serious: true },
+                    { keyword: "degenerative", serious: true },
+                    { keyword: "infections", serious: true },
+                    { keyword: "tumors", serious: true },
+                    { keyword: "congenital", serious: true }
+                ]
+            },
+            {
+                name: "Dr. John Haddon",
+                specialization: "Pulmonologist",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "asthma", serious: true },
+                    { keyword: "pulmonologist", serious: true },
+                    { keyword: "chest", serious: true },
+                    { keyword: "cough", serious: false }
+                ]
+            },
+            {
+                name: "Dr. Disha Sarkar",
+                specialization: "Psychiatrist",
+                contact: "XXXXXXXXXX",
+                gmeet: "https://meet.google.com/fhi-rciq-mvt",
+                keywords: [
+                    { keyword: "psychiatrist", serious: true },
+                    { keyword: "mental", serious: true },
+                    { keyword: "suicidal", serious: true },
+                    { keyword: "behavior", serious: true }
+                ]
+            }
+        ];
+
+        function handleUrgentCare() {
+            const symptomText = document.getElementById('urgentSymptomBox').value.toLowerCase().trim();
+            
+            // Step 1: Show matching status
+            document.getElementById('urgentCareStatus').innerHTML = `
+                <p><strong>Status:</strong> Matching your case to an available doctor...</p>
+            `;
+
+            // Step 2: Find the appropriate doctor (simulate a short delay for better UX)
+            setTimeout(() => {
+                let doctor = null;
+                let isSerious = false;
+
+                // Match input with doctor keywords and check seriousness
+                for (const doc of doctors) {
+                    for (const keywordObj of doc.keywords) {
+                        if (symptomText.includes(keywordObj.keyword)) {
+                            doctor = doc;
+                            if (keywordObj.serious) {
+                                isSerious = true;
+                            }
+                            break; // Stop at the first match
+                        }
+                    }
+                    if (doctor) break; // Stop once a doctor is matched
+                }
+
+                // Default to Physician if no specific match
+                if (!doctor) {
+                    doctor = {
+                        name: "Dr. Shweta Dutta",
+                        specialization: "Physician",
+                        contact: "XXXXXXXXXX",
+                        gmeet: "https://meet.google.com/fhi-rciq-mvt"
+                    };
+                    isSerious = false; // Assume non-serious for the default doctor
+                }
+
+                // Step 3: Display doctor details, only show Google Meet if the case is serious
+                document.getElementById('urgentCareStatus').innerHTML = `
+                    <p><strong>Doctor Assigned:</strong> ${doctor.name} (${doctor.specialization})</p>
+                    <p><strong>Contact:</strong> ${doctor.contact}</p>
+                    ${isSerious ? `<p><strong>Google Meet:</strong> <a href="${doctor.gmeet}" target="_blank">Join Meeting</a></p>` : '<p style="color: red; font-weight: bold;"><strong>Your symptoms do not appear to be serious. Please contact the doctor directly for further assistance.</strong></p>'}
+                `;
+            }, 1500); // Simulate a 1.5-second delay for UX
+        }
+
+
+        // Add event listener to detect the "Enter" key
+        userInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission
+                sendMessage(); // Trigger the sendMessage function when Enter is pressed
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Ignore virtual environment
+django_env/
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+
+# Ignore environment variables file
+.env
+
+# Ignore SQLite database
+*.sqlite3
